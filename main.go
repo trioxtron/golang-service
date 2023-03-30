@@ -1,46 +1,23 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
-	"log"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/trioxtron/golang-service/api"
 )
 
-type dogImage struct {
-    Message string `json:"message"`
-    Status  string `json:"status"`
+func setupRoutes(app *fiber.App) {
+	app.Get("/api/", func(c *fiber.Ctx) error {
+        return api.GetApis(c)
+	})
+	app.Get("/api/:api", func(c *fiber.Ctx) error {
+        return api.GetApi(c)
+	})
 }
-
-func fetch(url string) *http.Response {
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return res
-}
-
 
 func main() {
-    var fetchDog dogImage
-    
-    app := fiber.New()
-
-    app.Get("/", func(c *fiber.Ctx) error {
-        fetchRes := fetch("https://dog.ceo/api/breeds/image/random").Body
-        body, err := io.ReadAll(fetchRes)
-        if err != nil {
-            log.Fatalln(err)
-        }
-
-        if err :=json.Unmarshal(body, &fetchDog); err != nil {
-            log.Fatalln(err)
-        }
-        return c.JSON(fetchDog)
-    })
-
-    app.Listen(":3000")
+	app := fiber.New()
+	setupRoutes(app)
+	app.Listen(":3000")
 
 }
